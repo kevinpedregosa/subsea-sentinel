@@ -1,0 +1,22 @@
+column,type,description
+year,int,Observation year (2015-2026)
+cable_id,string,Synthetic cable system id
+ocean_route,string,"Route/region (Trans-Atlantic, Trans-Pacific, EMEA-Asia, ...)"
+operator_type,string,Owner type: hyperscaler / consortium / carrier / government
+rfs_year,int,Ready-for-service year (when the cable went live)
+age_years,int,Cable age that year
+fiber_pairs,int,Number of fiber pairs (higher = newer/higher capacity)
+length_km,float,Cable length (km)
+n_landing_countries,int,Number of countries with landing stations
+chokepoint,string,Maritime chokepoint the cable transits (or None)
+design_capacity_tbps,float,"Design (potential) capacity, Tbps"
+lit_capacity_tbps,float,"Lit (active) capacity, Tbps"
+utilization_pct,float,Capacity utilization (%)
+protected_burial,int,1 if buried/armored for protection
+design_life_years,int,Engineered design life (~25y)
+route_redundancy,int,Number of cables sharing that route-year
+is_low_redundancy,int,1 if route is in the bottom-quartile of redundancy
+vulnerability_index,float,COMPUTED analytical exposure index (0-100)
+fault_cause,string,Cause if a fault occurred (fishing_anchor / natural_hazard / equipment / suspected_external / none)
+fault_this_year,int,1 if the cable had a fault that year
+fault_next_year,float,ML TARGET (forward-looking): 1 if a fault occurs next year; NaN for 2026
