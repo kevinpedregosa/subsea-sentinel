@@ -64,4 +64,38 @@ def load_and_clean(path=DATA_PATH):
         f"got {len(df)}"
     )
 
+    # 14 of the 500 raw cables entered in 2026 (age_years == 0) with no other
+    # observation -- that single row is both their first and last, so its
+    # fault_next_year is NaN and Step 5 drops it, leaving the cable with zero
+    # rows and no way to appear in this dataframe at all. 500 - 14 == 486 is
+    # therefore the expected surviving cable count, not 500 -- if this ever
+    # reads 500, the NaN-target drop above silently stopped removing rows.
+    n_unique_cables = df['cable_id'].nunique()
+    assert n_unique_cables == 486, (
+        f"Expected 486 surviving cables (500 raw cables minus 14 that debut in "
+        f"2026 with only that single row and no fault_next_year to predict), "
+        f"got {n_unique_cables}"
+    )
+
+    # Confirm the drops above actually eliminate every gap, across all 500
+    # cables -- not just the 6 found by hand in the Week 1 audit. For a
+    # cable with no gap, its row count should equal the full span from its
+    # min to max observed year (e.g. 2018-2023 is 6 years and 6 rows). If
+    # the row count is smaller than that span, some year in the middle is
+    # still missing, and any rolling-window feature built on it would
+    # silently span the gap.
+    cable_year_stats = df.groupby('cable_id')['year'].agg(['min', 'max', 'count'])
+    expected_span = cable_year_stats['max'] - cable_year_stats['min'] + 1
+    still_gapped = cable_year_stats[expected_span != cable_year_stats['count']]
+
+    if len(still_gapped) > 0:
+        for cable_id in still_gapped.index:
+            years = sorted(df.loc[df['cable_id'] == cable_id, 'year'].tolist())
+            print(f"GAP STILL PRESENT after cleaning: {cable_id}: {years}")
+
+    assert len(still_gapped) == 0, (
+        f"{len(still_gapped)} cable(s) still have a year gap after cleaning: "
+        f"{still_gapped.index.tolist()}"
+    )
+
     return df
